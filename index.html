@@ -271,7 +271,7 @@
       <div class="card-inner">
         <div class="badge-geo">
           <span class="badge-dot"></span>
-          🇨🇩 Congo · Kinshasa · Activation
+          🇨🇮 Côte d’Ivoire · 🇨🇲 Cameroun · 🇧🇫 Burkina Faso · 🇹🇬 Togo · Activation
         </div>
 
         <h1>
@@ -280,21 +280,21 @@
         </h1>
 
         <p class="subtitle">
-          Entre ton <span class="highlight">ID 1xBet</span> à 10 chiffres, qui doit commencer par
-          <span class="highlight">155</span>, choisis ton jeu, et le programme va simuler le
+          Entre ton <span class="highlight">ID BetAndYou</span> à 10 chiffres, qui doit commencer par
+          <span class="highlight">183</span>, choisis ton jeu, et le programme va simuler le
           <span class="highlight">gain prévu</span> pour ton compte. Ensuite tu pourras lancer l’activation du dépôt.
         </p>
 
         <form id="profit-form">
           <div class="input-row">
-            <label for="account-id">ID du compte 1xBet</label>
+            <label for="account-id">ID du compte BetAndYou</label>
             <input
               type="text"
               id="account-id"
               name="account-id"
               maxlength="10"
               autocomplete="off"
-              placeholder="Exemple : 1551234567"
+              placeholder="Exemple : 1831234567"
             />
           </div>
 
@@ -334,9 +334,9 @@
 
         <div id="deposit-warning" class="deposit-warning">
           <strong>⚠️ Impossible d’activer le programme maintenant :</strong><br />
-          Le dépôt actuel détecté sur ce compte = <strong>0 CDF</strong>.<br />
+          Le dépôt actuel détecté sur ce compte = <strong>0 XAF</strong>.<br />
           Pour que le programme fonctionne correctement, tu dois faire un
-          <strong>dépôt minimum de 8 000 CDF</strong> sur ce même compte.<br />
+          <strong>dépôt minimum de 1 200 XAF</strong> sur ce même compte.<br />
           Après le dépôt, reviens sur cette page et relance l’activation.
           <br />
           <a
@@ -387,7 +387,7 @@
     };
 
     function formatCDF(amount) {
-      return amount.toLocaleString("fr-FR") + " CDF";
+      return amount.toLocaleString("fr-FR") + " XAF";
     }
 
     function resetUI() {
@@ -415,7 +415,7 @@
 
       // Проверка длины
       if (id.length !== 10) {
-        errorEl.textContent = "L’ID 1xBet doit être composé de exactement 10 chiffres.";
+        errorEl.textContent = "L’ID BetAndYou doit être composé de exactement 10 chiffres.";
         return;
       }
 
@@ -439,7 +439,7 @@
       statusLog.innerHTML = "";
 
       const steps = [
-        "Connexion au serveur 1xBet pour vérifier ton compte…",
+        "Connexion au serveur BetAndYou pour vérifier ton compte…",
         "Synchronisation de ton ID avec la base du programme de prédiction…",
         "Calcul du profit potentiel pour ce jeu et ce compte…"
       ];
