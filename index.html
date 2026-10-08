@@ -1,379 +1,482 @@
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    
-    @keyframes pulse-yellow { 
-        0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.4); } 
-        50% { box-shadow: 0 0 20px rgba(234, 179, 8, 0.8); } 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Activation · Programme de prédiction</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #020617;
+      --accent: #facc15;
+      --accent-soft: rgba(250, 204, 21, 0.12);
+      --accent-border: rgba(250, 204, 21, 0.6);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --border: #1f2937;
+      --danger: #f97373;
     }
-    .warning-glow { animation: pulse-yellow 2s infinite; }
-    
-    @keyframes pulse-green { 
-        0%, 100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); } 
-        50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); } 
-    }
-    .success-glow { animation: pulse-green 2s infinite; }
-    
-    .loading-bar { position: relative; overflow: hidden; }
-    .loading-bar::after {
-        content: ''; position: absolute; top: 0; right: -100%; width: 50%; height: 100%;
-        background: linear-gradient(270deg, transparent, rgba(59, 130, 246, 0.8), transparent);
-        animation: loading 1.5s infinite ease-in-out;
-    }
-    @keyframes loading { 100% { right: 200%; } }
-    
-    @keyframes slideUpFade {
-        from { opacity: 0; transform: translateY(20px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .animate-slide-up { animation: slideUpFade 0.4s ease-out forwards; }
-    
-    @keyframes fadeOutDown {
-        from { opacity: 1; transform: translateY(0); }
-        to { opacity: 0; transform: translateY(20px); }
-    }
-    .animate-fade-out { animation: fadeOutDown 0.4s ease-out forwards; }
 
-    .typing-text::after {
-        content: '|';
-        animation: blink 1s step-start infinite;
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0f172a 0, #020617 45%, #000 100%);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
     }
-    @keyframes blink { 50% { opacity: 0; } }
 
-    .mine-cell {
-        aspect-ratio: 1;
-        border-radius: 0.5rem;
-        background-color: #18181b; 
-        border: 1px solid #27272a; 
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-        font-size: 1.25rem;
+    .page {
+      width: 100%;
+      max-width: 560px;
     }
-    .mine-cell.safe {
-        background-color: rgba(34, 197, 94, 0.2);
-        border-color: #22c55e;
-        box-shadow: 0 0 10px rgba(34, 197, 94, 0.3) inset;
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(250, 204, 21, 0.12), transparent 55%),
+                  #020617;
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 22px 40px rgba(0, 0, 0, 0.6);
+      padding: 22px 20px 20px;
+      position: relative;
+      overflow: hidden;
     }
-</style>
-<div id="view-language" class="app-view flex flex-1 w-full max-w-xl flex-col items-center justify-center animate-fade-in z-10 py-10">
-    <div class="text-center mb-10">
-        <h1 class="text-3xl font-black text-white tracking-tighter mb-2">اللغة / LANGUAGE</h1>
-        <p class="text-xs text-zinc-500 uppercase tracking-widest font-bold">اختر لغتك للمتابعة</p>
-    </div>
-    
-    <div class="w-full space-y-4 px-2">
-        <button class="btn-lang w-full bg-zinc-900 border border-zinc-800 hover:border-blue-500 rounded-2xl p-5 flex items-center justify-center gap-4 transition-all shadow-[0_0_15px_rgba(59,130,246,0.1)]" data-lang="ar">
-            <span class="font-bold text-white text-lg tracking-widest">العربية (Algeria)</span>
-        </button>
-        <button class="btn-lang w-full bg-zinc-900 border border-zinc-800 hover:border-orange-500 rounded-2xl p-5 flex items-center justify-center gap-4 transition-all shadow-[0_0_15px_rgba(249,115,22,0.1)]" data-lang="en">
-            <span class="font-bold text-white text-lg tracking-widest">ENGLISH</span>
-        </button>
-    </div>
-</div>
 
-<div id="view-instructions" class="app-view hidden flex-1 w-full max-w-xl flex-col items-center pt-4 pb-20 animate-fade-in z-10">
-    <div class="text-center mb-6">
-        <h1 class="text-3xl font-black text-white tracking-tighter mb-2" data-i18n="inst_title">التعليمات</h1>
-        <p class="text-xs text-zinc-500 uppercase tracking-widest font-bold" data-i18n="inst_sub">كيفية استخدام برنامج التنبؤ</p>
-    </div>
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
 
-    <div class="bg-zinc-900/85 backdrop-blur-md border border-zinc-800 rounded-2xl p-6 shadow-2xl w-full text-right relative overflow-hidden mb-6">
-        <div class="space-y-6">
-            <!-- Step 1 -->
-            <div class="flex gap-4 items-start flex-row-reverse">
-                <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/50 flex items-center justify-center text-xl shrink-0 shadow-[0_0_15px_rgba(59,130,246,0.
-                    2)]">💰</div>
-                <div>
-                    <h3 class="text-white font-bold mb-1" data-i18n="bet_title">مبلغ الرهان</h3>
-                    <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="bet_desc">ابدأ بمبالغ صغيرة (5-10% من رصيدك). هذا ضروري لتسخين الخوارزمية وتجنب نظام مكافحة الاحتيال في الكาสينو.</p>
-                </div>
-            </div>
+    .badge-geo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
 
-            <!-- Step 2 -->
-            <div class="flex gap-4 items-start flex-row-reverse">
-                <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/50 flex items-center justify-center text-xl shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">🎯</div>
-                <div>
-                    <h3 class="text-white font-bold mb-1" data-i18n="sig_title">توليد الإشارات</h3>
-                    <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="sig_desc">اختر لعبة وانقر على الزر للحصول على إشارة. ستحصل على طريق آمن (خلايا) أو مضاعف دقيق.</p>
-                </div>
-            </div>
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.2);
+    }
 
-            <!-- Strict Rule -->
-            <div class="bg-red-500/10 border border-red-500/30 p-5 rounded-xl mt-4 relative overflow-hidden text-right">
-                <h3 class="text-red-500 font-bold mb-2 flex items-center gap-2 text-lg flex-row-reverse justify-end" data-i18n="rule_title">
-                    قاعدة صارمة!
-                </h3>
-                <p class="text-sm text-red-200 leading-relaxed relative z-10" data-i18n="rule_desc">
-                    إذا أظهر المؤشر مضاعفاً دقيقاً، <strong>فابتعه بحذافيره</strong> واصحب أرباحك عند تلك القيمة. ممنوع منعاً باتاً الطمع والانتظار لمضاعف أعلى!
-                </p>
-            </div>
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h1 span.icon {
+      font-size: 1.6rem;
+    }
+
+    .subtitle {
+      margin: 0 0 16px;
+      font-size: 0.93rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .input-row {
+      margin-bottom: 10px;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+
+    input[type="text"]::placeholder {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    select:invalid {
+      color: #6b7280;
+    }
+
+    .error {
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: #fecaca;
+      min-height: 1em;
+    }
+
+    .btn-main,
+    .btn-secondary {
+      width: 100%;
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 14px;
+      border-radius: 999px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-main {
+      background: linear-gradient(135deg, #facc15, #eab308);
+      color: #020617;
+      box-shadow: 0 16px 30px rgba(250, 204, 21, 0.35);
+    }
+
+    .btn-main span.icon,
+    .btn-secondary span.icon {
+      font-size: 1.1rem;
+    }
+
+    .btn-main:disabled,
+    .btn-secondary:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      margin-top: 6px;
+    }
+
+    .status-box {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: 0.86rem;
+      display: none;
+    }
+
+    .status-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    .status-log p {
+      margin: 3px 0;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    .status-log p.strong {
+      color: var(--accent);
+    }
+
+    .profit-box {
+      margin-top: 10px;
+      padding: 9px 11px;
+      border-radius: 12px;
+      background: rgba(22, 163, 74, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.8);
+      font-size: 0.86rem;
+      display: none;
+    }
+
+    .profit-box strong {
+      color: #bbf7d0;
+    }
+
+    .deposit-warning {
+      margin-top: 12px;
+      padding: 9px 11px;
+      border-radius: 12px;
+      background: rgba(220, 38, 38, 0.18);
+      border: 1px solid rgba(248, 113, 113, 0.9);
+      font-size: 0.85rem;
+      color: #fee2e2;
+      display: none;
+    }
+
+    .deposit-warning strong {
+      color: #fecaca;
+    }
+
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(250, 204, 21, 0.7);
+      background: rgba(15, 23, 42, 0.98);
+      color: #fefce8;
+      font-size: 0.82rem;
+      text-decoration: none;
+      gap: 6px;
+    }
+
+    .link-btn span.icon {
+      font-size: 1rem;
+    }
+
+    .link-btn:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.6);
+    }
+
+    footer {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="card">
+      <div class="card-inner">
+        <div class="badge-geo">
+          <span class="badge-dot"></span>
+          🇨🇩 Congo · Kinshasa · Activation
         </div>
-    </div>
 
-    <button type="button" id="btn-understand" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold text-lg tracking-wider transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3" data-i18n="btn_start">
-        فهمت، ابدأ الآن
-        <svg class="w-5 h-5 mr-2 inline rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-    </button>
-</div>
+        <h1>
+          <span class="icon">💳</span>
+          Activer ton compte pour le programme
+        </h1>
 
-<div id="view-landing" class="app-view hidden flex-1 w-full max-w-xl flex-col items-center justify-center animate-fade-in z-10">
-    <div class="text-center mb-10">
-        <svg class="w-24 h-24 mx-auto mb-6 fill-white drop-shadow-[0_0_15px_rgba(59,130,246,0.6)]" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M40 20 L50 35 L40 50 L55 50 L65 30 L55 20 Z" />
-            <path d="M60 40 L65 50 L55 60 L65 60 L75 45 L65 35 Z" />
-            <path d="M70 55 L75 65 L65 75 L75 75 L85 60 L75 50 Z" />
-        </svg>
-        <h1 class="text-4xl font-black text-white tracking-tighter mb-2" data-i18n="link_title">تم ربط <span class="text-green-500">الحساب</span></h1>
-        <p class="text-xs text-zinc-500 uppercase tracking-widest font-bold" data-i18n="link_sub">الخطوة 2: التحقق من الشبكة</p>
-    </div>
-
-    <div class="bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-2xl p-8 shadow-2xl w-full text-center relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-blue-600 to-green-500"></div>
-        <h2 class="text-xl font-black text-white mb-4" data-i18n="act_title">إتمام التفعيل</h2>
-        <p class="text-sm text-zinc-400 mb-8 leading-relaxed" data-i18n="act_desc">
-            تم التعرف على حساب الرهان الخاص بك بواسطة شبكة KRAKEN. نحتاج إلى تشغيل مزامنة أخيرة لإنشاء نفق اختراق آمن.
+        <p class="subtitle">
+          Entre ton <span class="highlight">ID 1xBet</span> à 10 chiffres, qui doit commencer par
+          <span class="highlight">155</span>, choisis ton jeu, et le programme va simuler le
+          <span class="highlight">gain prévu</span> pour ton compte. Ensuite tu pourras lancer l’activation du dépôt.
         </p>
-        <button type="button" id="btn-sync" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold text-lg tracking-wider transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3" data-i18n="btn_sync">
-            مزامنة الآن
-            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.
-                                                                                                       001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-        </button>
-    </div>
-</div>
 
-<div id="view-loader" class="app-view hidden flex-1 w-full max-w-xl flex-col items-center justify-center animate-fade-in z-10">
-    <div class="w-full bg-[#0a0a0c] border border-zinc-800 rounded-2xl p-6 shadow-2xl font-mono text-sm text-right" dir="ltr">
-        <div class="flex items-center gap-2 mb-6 pb-4 border-b border-zinc-800 flex-row-reverse">
-            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <div class="w-3 h-3 rounded-full bg-green-500"></div>
-            <span class="mr-2 text-zinc-500 text-xs">kraken_core_algeria.exe</span>
+        <form id="profit-form">
+          <div class="input-row">
+            <label for="account-id">ID du compte 1xBet</label>
+            <input
+              type="text"
+              id="account-id"
+              name="account-id"
+              maxlength="10"
+              autocomplete="off"
+              placeholder="Exemple : 1551234567"
+            />
+          </div>
+
+          <div class="input-row">
+            <label for="game">Choisis ton jeu</label>
+            <select id="game" name="game" required>
+              <option value="" disabled selected>— Sélectionne un jeu —</option>
+              <option value="aviator">Aviator ✈️</option>
+              <option value="mines">Mines 💣</option>
+              <option value="penalty">Penalty ⚽</option>
+            </select>
+          </div>
+
+          <div id="error" class="error"></div>
+
+          <button id="simulate-btn" class="btn-main" type="submit">
+            <span class="icon">📊</span>
+            <span>Simuler mon profit</span>
+          </button>
+        </form>
+
+        <div id="status-box" class="status-box">
+          <div class="status-title">Simulation en cours</div>
+          <div id="status-log" class="status-log"></div>
         </div>
-        
-        <div class="space-y-2 text-zinc-400 min-h-[120px] flex flex-col justify-end" id="terminal-output">
-            <!-- JS will inject lines here -->
+
+        <div id="profit-box" class="profit-box">
+          Pour le jeu <span id="chosen-game-label"></span>,  
+          le programme montre un gain potentiel d’environ
+          <strong id="profit-amount"></strong>.
         </div>
-        
-        <div class="mt-6 w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden loading-bar"></div>
-    </div>
-</div>
 
-<div id="view-games" class="app-view hidden flex-1 w-full max-w-xl flex-col items-center pt-10 pb-20 animate-fade-in z-10">
-    <div class="text-center mb-8">
-        <h2 class="text-2xl font-black text-white tracking-tight mb-2" data-i18n="games_title">اختر الهدف</h2>
-        <p class="text-sm text-zinc-500" data-i18n="games_sub">اختر لعبة لحقن الثغرة</p>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4 w-full px-2">
-        <!-- Mines -->
-        <button class="game-card bg-zinc-900 border border-zinc-800 hover:border-blue-500 rounded-2xl p-6 flex flex-col items-center gap-4 transition-all" data-game="Mines">
-            <div class="text-5xl">💣</div>
-            <span class="font-bold text-white tracking-widest text-sm">ألغام (MINES)</span>
-        </button>
-        
-        <!-- Aviator -->
-        <button class="game-card bg-zinc-900 border border-zinc-800 hover:border-red-500 rounded-2xl p-6 flex flex-col items-center gap-4 transition-all" data-game="Aviator">
-            <div class="text-5xl">✈️</div>
-            <span class="font-bold text-white tracking-widest text-sm">أفياتور (AVIATOR)</span>
-        </button>
-        
-        <!-- Thimbles -->
-        <button class="game-card bg-zinc-900 border border-zinc-800 hover:border-yellow-500 rounded-2xl p-6 flex flex-col items-center gap-4 transition-all" data-game="Thimbles">
-            <div class="text-5xl">🎩</div>
-            <span class="font-bold text-white tracking-widest text-sm">الكؤوس (THIMBLES)</span>
+        <button id="start-btn" class="btn-secondary" type="button" style="display:none;">
+          <span class="icon">🚀</span>
+          <span>Commencer à gagner maintenant</span>
         </button>
 
-        <!-- Apple -->
-        <button class="game-card bg-zinc-900 border border-zinc-800 hover:border-green-500 rounded-2xl p-6 flex flex-col items-center gap-4 transition-all" data-game="Apple">
-            <div class="text-5xl">🍏</div>
-            <span class="font-bold text-white tracking-widest text-sm text-center">تفاحة الحظ (APPLE)</span>
-        </button>
-    </div>
-</div>
-
-<div id="view-signal" class="app-view hidden flex-1 w-full max-w-xl flex-col items-center pt-8 pb-20 animate-fade-in z-10">
-    
-    <div class="w-full flex items-center justify-between mb-8 pb-4 border-b border-zinc-800 flex-row-reverse">
-        <div class="flex items-center gap-3 flex-row-reverse">
-            <div class="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center border border-green-500/30">
-                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
-            <div class="text-right">
-                <div class="flex items-center gap-2 mb-1 flex-row-reverse">
-                    <span class="w-2 h-2 bg-green-500 rounded-full success-glow"></span>
-                    <span class="text-xs font-black text-green-500 tracking-wider" data-i18n="tun_sec">النفق آمن</span>
-                </div>
-                <p class="text-[10px] font-bold text-zinc-500 tracking-widest uppercase"><span data-i18n="tgt_lbl">الهدف:</span> <span id="target-game-name" class="text-white"></span></p>
-            </div>
+        <div id="deposit-warning" class="deposit-warning">
+          <strong>⚠️ Impossible d’activer le programme maintenant :</strong><br />
+          Le dépôt actuel détecté sur ce compte = <strong>0 CDF</strong>.<br />
+          Pour que le programme fonctionne correctement, tu dois faire un
+          <strong>dépôt minimum de 8 000 CDF</strong> sur ce même compte.<br />
+          Après le dépôt, reviens sur cette page et relance l’activation.
+          <br />
+          <a
+            href="https://reffpa.com/L?tag=d_2843259m_97c_&site=2843259&ad=97"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-btn"
+          >
+            <span class="icon">💳</span>
+            <span>Aller à la page de dépôt</span>
+          </a>
         </div>
-        <div class="text-left">
-            <p class="text-xs text-zinc-500 mb-1" data-i18n="acc_lbl">الدقة</p>
-            <p class="text-sm font-black text-white font-mono">99.1%</p>
-        </div>
-    </div>
 
-    <!-- Dynamic Signal Container -->
-    <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 w-full mb-8 relative flex justify-center items-center min-h-[250px]" id="signal-container">
-        <!-- Injected via JS based on game -->
-    </div>
+        <footer>
+          © <span id="year"></span> Programme de prédiction · Activation du dépôt
+        </footer>
+      </div>
+    </section>
+  </div>
 
-    <div class="w-full px-4">
-        <button type="button" id="btn-next-signal" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 py-4 rounded-xl font-bold text-lg tracking-wider transition-all flex items-center justify-center gap-3 shadow-[0_5px_15px_rgba(0,0,0,0.5)]" data-i18n="btn_next">
-            الحصول على الإشارة التالية
-            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-        </button>
-        <p class="text-center text-xs text-zinc-600 mt-4 uppercase"><span data-i18n="free_lbl">الإشارات المجانية المتبقية:</span> <span class="text-white font-bold bg-zinc-800 px-2 py-0.5 rounded">0</span></p>
-    </div>
-</div>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
 
-<div id="view-deposit" class="app-view hidden flex-1 w-full max-w-xl flex-col items-center pt-6 pb-20 animate-fade-in z-10 text-right">
-    
-    <div class="w-full flex items-center justify-between mb-6 pb-4 border-b border-zinc-800 flex-row-reverse">
-        <div class="flex items-center gap-3 flex-row-reverse">
-            <svg class="w-10 h-10 fill-zinc-500" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <path d="M40 20 L50 35 L40 50 L55 50 L65 30 L55 20 Z" />
-                <path d="M60 40 L65 50 L55 60 L65 60 L75 45 L65 35 Z" />
-                <path d="M70 55 L75 65 L65 75 L75 75 L85 60 L75 50 Z" />
-            </svg>
-            <div class="text-right">
-                <div class="flex items-center gap-2 mb-1 flex-row-reverse">
-                    <span class="w-2 h-2 bg-yellow-500 rounded-full warning-glow"></span>
-                    <span class="text-xs font-black text-yellow-500 tracking-wider" data-i18n="dep_wait">في انتظار الإيداع</span>
-                </div>
-                <p class="text-[10px] font-bold text-zinc-500 tracking-widest uppercase" data-i18n="dep_block">النفق: مغلق</p>
-            </div>
-        </div>
-    </div>
+    const form = document.getElementById("profit-form");
+    const input = document.getElementById("account-id");
+    const gameSelect = document.getElementById("game");
+    const errorEl = document.getElementById("error");
+    const simulateBtn = document.getElementById("simulate-btn");
+    const statusBox = document.getElementById("status-box");
+    const statusLog = document.getElementById("status-log");
+    const profitBox = document.getElementById("profit-box");
+    const chosenGameLabel = document.getElementById("chosen-game-label");
+    const profitAmountEl = document.getElementById("profit-amount");
+    const startBtn = document.getElementById("start-btn");
+    const depositWarning = document.getElementById("deposit-warning");
 
-    <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-6 w-full mb-6 relative overflow-hidden">
-        <h3 class="text-lg font-black text-white mb-2 relative z-10" data-i18n="dep_zero">تم اكتشاف رصيد صفر</h3>
-        <p class="text-sm text-zinc-300 leading-relaxed relative z-10" data-i18n="dep_zero_desc">
-            لقد استهلكت إشارتك التجريبية المجانية. رصدت شبكة KRAKEN رصيداً قدره <span class="text-yellow-500 font-bold bg-yellow-500/10 px-1 py-0.5 rounded border border-yellow-500/20">0.00 DZD</span> في حسابك. <br><br>
-            لتجاوز نظام مكافحة الاحتيال وتلقي إشارات مستمرة دون حظر، تتطلب الخوارزمية وجود رصيد لعب نشط. لا تنسَ استخدام البروموكود عند التسجيل: <strong class="text-green-400">DDS97</strong>
-        </p>
-    </div>
-
-    <div class="w-full bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5 mb-6">
-        <h4 class="text-xs text-zinc-500 uppercase tracking-widest font-bold mb-4" data-i18n="dep_steps">خطوات التفعيل:</h4>
-        
-        <div class="space-y-4">
-            <div class="flex gap-3 items-start flex-row-reverse text-right">
-                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold mt-0.5">1</span>
-                <p class="text-sm text-zinc-300 leading-relaxed" data-i18n="dep_s1">
-                    قم بإيداع مبلغ في حساب الرهان الخاص بك (استخدم البروموكود <strong class="text-green-400">DDS97</strong>).<br>
-                    <span class="block mt-1.5 text-xs">الحد الأدنى المطلوب: <span class="text-green-400 font-bold font-mono bg-green-900/20 px-1.5 py-0.5 rounded border border-green-500/20">1000 DZD</span></span>
-                </p>
-            </div>
-            <div class="flex gap-3 items-start flex-row-reverse text-right">
-                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold mt-0.5">2</span> 
-                <p class="text-sm text-zinc-300 leading-relaxed" data-i18n="dep_s2">
-                    التقاط صورة الشاشة (لقطة شاشة) تُظهر رصيدك الجديد أو إيصال الإيداع الناجح.
-                </p>
-            </div>
-            <div class="flex gap-3 items-start flex-row-reverse text-right">
-                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold mt-0.5">3</span> 
-                <p class="text-sm text-zinc-300 leading-relaxed" data-i18n="dep_s3">
-                    أرسل لقطة الشاشة إلى مديرنا لفتح الوصول الكامل للبوت.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div class="w-full space-y-3">
-        <a href="https://reffpa.com/L?tag=d_6125654m_18609c_&site=6125654&ad=18609&r=registration" target="_blank" rel="noreferrer" class="w-full bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-600 hover:to-blue-400 text-white py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)]" data-i18n="btn_make_dep">
-            إجراء إيداع (بروموكود: DDS97)
-            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-        </a>
-
-        <a href="https://telegram.me/Jeffrey_Kraken_bot" target="_blank" rel="noreferrer" class="w-full bg-[#2AABEE] hover:bg-[#229ED9] text-white py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(42,171,238,0.4)]" data-i18n="btn_send_ss">
-            <svg class="w-5 h-5 ml-2 inline" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.888-.662 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> إرسال لقطة الشاشة
-        </a>
-    </div>
-</div>
-
-<div id="live-feed" class="fixed bottom-4 left-4 right-4 md:left-6 md:right-auto md:w-80 flex flex-col gap-2 z-40 pointer-events-none">
-    <!-- JS will inject toast items here -->
-</div>
-
-<script>
-    // Dictionary for Translations (Arabic Algeria & English)
-    const translations = {
-        ar: {
-            inst_title: "التعليمات",
-            inst_sub: "كيفية استخدام برنامج التنبؤ",
-            bet_title: "مبلغ الرهان",
-            bet_desc: "ابدأ بمبالغ صغيرة (5-10% من رصيدك). هذا ضروري لتسخين الخوارزمية وتجنب نظام مكافحة الاحتيال.",
-            sig_title: "توليد الإشارات",
-            sig_desc: "اختر لعبة وانقر على الزر للحصول على إشارة. ستحصل على طريق آمن (خلايا) أو مضاعف دقيق.",
-            rule_title: "قاعدة صارمة!",
-            rule_desc: "إذا أظهر المؤشر مضاعفاً دقيقاً، <strong>فابتعه بحذافيره</strong> واصحب أرباحك عند تلك القيمة. ممنوع منعاً باتاً الطمع!",
-            btn_start: 'فهمت، ابدأ الآن <svg class="w-5 h-5 mr-2 inline rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>',
-            
-            link_title: 'تم ربط <span class="text-green-500">الحساب</span>',
-            link_sub: "الخطوة 2: التحقق من الشبكة",
-            act_title: "إتمام التفعيل",
-            act_desc: "تم التعرف على حساب الرهان الخاص بك. نحتاج إلى تشغيل مزامنة أخيرة لإنشاء نفق اختراق آمن.",
-            btn_sync: 'مزامنة الآن <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>',
-
-            games_title: "اختر الهدف",
-            games_sub: "اختر لعبة لحقن الثغرة",
-            
-            tun_sec: "النفق آمن",
-            tgt_lbl: "الهدف:",
-            acc_lbl: "الدقة",
-            btn_next: 'الحصول على الإشارة التالية <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>',
-            free_lbl: "الإشارات المجانية المتبقية:",
-
-            dep_wait: "في انتظار الإيداع",
-            dep_block: "النفق: مغلق",
-            dep_zero: "تم اكتشاف رصيد صفر",
-            dep_zero_desc: 'لقد استهلكت إشارتك التجريبية. رصدت شبكة KRAKEN رصيداً بقيمة <span class="text-yellow-500 font-bold bg-yellow-500/10 px-1 py-0.5 rounded border border-yellow-500/20">0.00 DZD</span>. <br><br>لتجاوز نظام الحماية وتلقي إشارات متواصلة، يرجى تعبئة الحساب باستخدام البروموكود <strong class="text-green-400">DDS97</strong>.',
-            dep_steps: "خطوات التفعيل:",
-            dep_s1: 'قم بإيداع مبلغ في حسابك (استخدم البروموكود <strong class="text-green-400">DDS97</strong>).<br><span class="block mt-1.5 text-xs">الحد الأدنى: <span class="text-green-400 font-bold font-mono bg-green-900/20 px-1.5 py-0.5 rounded border border-green-500/20">1000 DZD</span></span>',
-            dep_s2: "التقط صورة شاشة (لقطة) لرصيدك الجديد.",
-            dep_s3: "أرسل لقطة الشاشة للمدير لفتح الوصول الكامل.",
-            btn_make_dep: 'إجراء إيداع (DDS97) <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>',
-            btn_send_ss: '<svg class="w-5 h-5 ml-2 inline" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.888-.662 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> إرسال لقطة الشاشة',
-            aviator_cashout: "اسحب الأرباح عند:",
-            aviator_wait: "لا تنتظر طويلاً!",
-            thimbles_text: "الكرة في المنتصف"
-        },
-        en: {
-            inst_title: "INSTRUCTIONS",
-            inst_sub: "How to use the Predictor",
-            bet_title: "Bet Amount",
-            bet_desc: "Start with small amounts (5-10% of your balance). Necessary to warm up the algorithm.",
-            sig_title: "Signal Generation",
-            sig_desc: "Select a game and click the button to get a signal.",
-            rule_title: "STRICT RULE!",
-            rule_desc: "If the predictor shows an exact multiplier, strictly follow it!",
-            btn_start: 'I UNDERSTAND, START',
-            link_title: 'ACCOUNT <span class="text-green-500">LINKED</span>',
-            link_sub: "Step 2: Network Verification",
-            act_title: "Complete Activation",
-            act_desc: "Account recognized. Promo code: DDS97",
-            btn_sync: 'SYNCHRONIZE NOW',
-            games_title: "SELECT TARGET",
-            games_sub: "Choose a game",
-            tun_sec: "TUNNEL SECURE",
-            tgt_lbl: "Target:",
-            acc_lbl: "ACCURACY",
-            btn_next: 'GET NEXT SIGNAL',
-            free_lbl: "Free signals left:",
-            dep_wait: "AWAITING DEPOSIT",
-            dep_block: "Tunnel: Blocked",
-            dep_zero: "Zero Balance Detected",
-            dep_zero_desc: 'Use promo code <strong>DDS97</strong> for your deposit.',
-            dep_steps: "Activation Steps:",
-            dep_s1: 'Make a deposit (Min: 1000 DZD, Code: DDS97)',
-            dep_s2: "Take a screenshot.",
-            dep_s3: "Send to manager.",
-            btn_make_dep: 'Make Deposit (DDS97)',
-            btn_send_ss: 'Send Screenshot',
-            aviator_cashout: "CASH OUT AT:",
-            aviator_wait: "Do not wait!",
-            thimbles_text: "Ball in the middle"
-        }
+    const gameLabels = {
+      aviator: "Aviator ✈️",
+      mines: "Mines 💣",
+      penalty: "Penalty ⚽"
     };
-</script>
+
+    // Пример потенциальной прибыли по играм (можешь поменять)
+    const gameProfits = {
+      aviator: 95000,
+      mines: 72000,
+      penalty: 81000
+    };
+
+    function formatCDF(amount) {
+      return amount.toLocaleString("fr-FR") + " CDF";
+    }
+
+    function resetUI() {
+      errorEl.textContent = "";
+      statusLog.innerHTML = "";
+      statusBox.style.display = "none";
+      profitBox.style.display = "none";
+      startBtn.style.display = "none";
+      depositWarning.style.display = "none";
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      resetUI();
+
+      const raw = (input.value || "").trim();
+      const id = raw.replace(/\s+/g, "");
+      const game = gameSelect.value;
+
+      // Проверка ID: только цифры
+      if (!/^\d+$/.test(id)) {
+        errorEl.textContent = "L’ID doit contenir uniquement des chiffres.";
+        return;
+      }
+
+      // Проверка длины
+      if (id.length !== 10) {
+        errorEl.textContent = "L’ID 1xBet doit être composé de exactement 10 chiffres.";
+        return;
+      }
+
+      // Проверка начала с 148
+      if (!id.startsWith("155")) {
+        errorEl.textContent = "L’ID doit commencer par 155 pour être reconnu par le programme.";
+        return;
+      }
+
+      // Проверка выбора игры
+      if (!game) {
+        errorEl.textContent = "Choisis d’abord un jeu pour la simulation.";
+        return;
+      }
+
+      simulateBtn.disabled = true;
+      input.disabled = true;
+      gameSelect.disabled = true;
+
+      statusBox.style.display = "block";
+      statusLog.innerHTML = "";
+
+      const steps = [
+        "Connexion au serveur 1xBet pour vérifier ton compte…",
+        "Synchronisation de ton ID avec la base du programme de prédiction…",
+        "Calcul du profit potentiel pour ce jeu et ce compte…"
+      ];
+
+      let index = 0;
+
+      function showNextStep() {
+        if (index < steps.length) {
+          const p = document.createElement("p");
+          p.textContent = steps[index];
+          if (index === steps.length - 1) {
+            p.classList.add("strong");
+          }
+          statusLog.appendChild(p);
+          index++;
+          setTimeout(showNextStep, 900);
+        } else {
+          // показываем потенциальную прибыль
+          const profit = gameProfits[game] || 50000;
+          chosenGameLabel.textContent = gameLabels[game] || "ce jeu";
+          profitAmountEl.textContent = formatCDF(profit);
+          profitBox.style.display = "block";
+          startBtn.style.display = "inline-flex";
+
+          simulateBtn.disabled = false;
+          input.disabled = false;
+          gameSelect.disabled = false;
+        }
+      }
+
+      showNextStep();
+    });
+
+    // Кнопка "Commencer à gagner maintenant" → ошибка депозита 8 000 CDF
+    startBtn.addEventListener("click", function () {
+      depositWarning.style.display = "block";
+    });
+  </script>
+</body>
+</html>
